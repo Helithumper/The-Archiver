@@ -2,6 +2,11 @@ import discord
 from datetime import datetime, timezone
 import os
 
+async def send_help_message(channel):
+    await channel.send('I can handle archiving channels and categories!')
+    await channel.send(f"""Commands:\n```!archive category [name] -- Archives an entire category\n!archive channel [name] -- Archives an entire channel```""")
+
+
 async def handle_message(message):
     # Determine which command this message is attempting
     channel = message.channel
@@ -13,8 +18,7 @@ async def handle_message(message):
     tokens = message.content.split(' ')[1:]
 
     if tokens[0] == 'help':
-        await channel.send('I can handle archiving channels and categories!')
-        await channel.send(f"""Commands:\n```!archive category [name] -- Archives an entire category\n!archive channel [name] -- Archives an entire channel```""")
+        await send_help_message(channel)
         return 
     
     if tokens[0] == 'channel':
