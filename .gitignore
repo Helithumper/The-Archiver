@@ -127,3 +127,12 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Start.sh
+start.sh
+
+# Archive Folder
+archive/
+
+# vscode
+.vscode/
