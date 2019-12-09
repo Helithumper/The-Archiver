@@ -3,10 +3,36 @@ from datetime import datetime, timezone
 import os
 
 async def send_help_message(channel):
-    await channel.send('I can handle archiving channels and categories!')
-    await channel.send(f"""Commands:\n```!archive category [name] -- Archives an entire category\n!archive channel [name] -- Archives an entire channel```""")
+    embed = discord.Embed(title="Archiver Help")
+    embed.color = discord.Colour.dark_blue()
+    embed.description = """I can handle archiving channels and categories!
+    Commands:
+```!archive category [name] -- Archives an entire category
+!archive channel [name] -- Archives an entire channel
+!archive all -- Archives all channels by category```"""
+    await channel.send(embed=embed)
 
+async def archive_category(category_name, channel):
+    categories = channel.guild.categories
+    matching_categories = list(filter(lambda x: x.name.lower() == category_name.lower(), categories))
 
+    if len(matching_categories) == 0:
+        await channel.send('No Matching Categories')
+        return
+    
+    for matching in matching_categories:
+        await channel.send(f'\t**{matching.name}**')
+        await channel.send(f'Archiving {len(matching.channels)} channels')
+        for i, child_channel in enumerate(matching.channels):
+            await channel.send(f'({i+1}/{len(matching.channels)}) Archiving *{child_channel.name}*')
+            await archive_channel(child_channel)
+
+def parse_channel_name(input_message):
+    tokens = input_message.split('/')
+    if len(tokens) > 1:
+        return tokens[1], tokens[0]
+    else:
+        return tokens[0], None
 async def handle_message(message):
     # Determine which command this message is attempting
     channel = message.channel
@@ -22,9 +48,16 @@ async def handle_message(message):
         return 
     
     if tokens[0] == 'channel':
-        channel_name = tokens[1]
+        channel_name, category_name = parse_channel_name(tokens[1])
         channels = channel.guild.channels
-        matching_channels = list(filter(lambda x: x.name == channel_name, channels))
+        if category_name:
+            matching_channels = list(filter(
+                lambda x: x.name == channel_name and x.category == category_name
+                , channels))
+        else:
+            matching_channels = list(filter(
+                lambda x: x.name == channel_name and x.category == None
+                , channels))
 
         if len(matching_channels) == 0:
             await channel.send('No Matching Channels')
@@ -42,21 +75,14 @@ async def handle_message(message):
     
     if tokens[0] == 'category':
         category_name = tokens[1]
-        categories = channel.guild.categories
-        matching_categories = list(filter(lambda x: x.name.lower() == category_name.lower(), categories))
-
-        if len(matching_categories) == 0:
-            await channel.send('No Matching Categories')
-            return
-        
-        await channel.send('Matching Categories:')
-        for matching in matching_categories:
-            await channel.send(f'\t**{matching.name}**')
-            for child_channel in matching.channels:
-                await channel.send(f'\tArchiving *{child_channel.name}*')
-                await archive_channel(child_channel)
+        await archive_category(category_name, channel)
         await channel.send("**Archival Complete**")
     
+    if tokens[0] == 'all':
+        categories = channel.guild.categories
+        for category_match in categories:
+            await archive_category(category_match.name, channel)
+        return
     else:
         await channel.send("Unknown command")
 
