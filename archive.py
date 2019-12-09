@@ -26,8 +26,8 @@ async def handle_message(message):
             await channel.send('No Matching Channels')
             return
         
-
         await channel.send('Maching Channels:')
+        ##TODO: check for category name. Category must be specified for categorized channels
         for matching in matching_channels:
             if matching.category != None:
                 await channel.send(f'\tArchiving *{matching.category.name}/{matching.name}*')
