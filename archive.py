@@ -38,6 +38,7 @@ async def handle_message(message):
             else:
                 await channel.send(f"\tArchiving *{matching.name}*")
             await archive_channel(matching)
+        await channel.send("**Archival Complete**")
     
     if tokens[0] == 'category':
         category_name = tokens[1]
@@ -54,6 +55,7 @@ async def handle_message(message):
             for child_channel in matching.channels:
                 await channel.send(f'\tArchiving *{child_channel.name}*')
                 await archive_channel(child_channel)
+        await channel.send("**Archival Complete**")
     
     else:
         await channel.send("Unknown command")
