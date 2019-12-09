@@ -8,7 +8,7 @@ async def send_help_message(channel):
     embed.description = """I can handle archiving channels and categories!
     Commands:
 ```!archive category [name] -- Archives an entire category
-!archive channel [name] -- Archives an entire channel
+!archive channel {category/}[name] -- Archives an entire channel
 !archive all -- Archives all channels by category```"""
     await channel.send(embed=embed)
 
